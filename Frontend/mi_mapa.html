@@ -110,9 +110,8 @@
     }
 
     function calcularRuta() {
-      // Obtener las coordenadas del accidente desde el mapa
       const direccionAccidente = document.getElementById('direccionAccidente').value;
-      
+
       geocodificarDireccion(direccionAccidente, function(accidenteCoords) {
         if (marcadorAccidente) {
           marcadorAccidente.setMap(null);
@@ -123,11 +122,10 @@
           title: "Accidente"
         });
 
-        // Obtener el hospital destino seleccionado
-        const hospitalDestino = document.getElementById('hospitalDestino').value;  // Aquí tomas el valor del hospital seleccionado
-        
+        const hospitalDestino = document.getElementById('hospitalDestino').value;
+
         // Enviar las coordenadas al backend para calcular la ruta
-        fetch('https://rutas.onrender.com/route', {  // URL pública de tu backend en Render
+        fetch('https://rutas.onrender.com/route', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -137,21 +135,49 @@
               lat: accidenteCoords.lat(),
               lng: accidenteCoords.lng()
             },
-            target: hospitalDestino  // Aquí pasas el nombre del hospital
+            target: hospitalDestino
           })
         })
         .then(response => response.json())
         .then(data => {
-          if (data.path) {
+          if (data.path && data.path.length > 0) {
             console.log('Ruta:', data.path);
-            // Aquí puedes mostrar la ruta en la interfaz de usuario
+            // Mostrar la ruta en el mapa
+            const rutaHtml = data.path.join('<br>');
+            const infoWindow = new google.maps.InfoWindow({
+              content: `<div><strong>Instrucciones:</strong><br>${rutaHtml}</div>`
+            });
+            infoWindow.open(map, marcadorAccidente);
+
+            // Mostrar marcador del hospital destino
+            const hospitalCoords = hospitales[hospitalDestino];
+            new google.maps.Marker({
+              position: hospitalCoords,
+              map: map,
+              title: hospitalDestino
+            });
+
+            // Ajustar el zoom del mapa para mostrar toda la ruta
+            const bounds = new google.maps.LatLngBounds();
+            bounds.extend(accidenteCoords);
+            bounds.extend(hospitalCoords);
+            map.fitBounds(bounds);
+
+            // Mostrar el costo (distancia) de la ruta
+            alert(`Distancia aproximada: ${data.cost.toFixed(2)} km`);
           } else {
             console.log('Error:', data.error);
+            alert('Error al calcular la ruta. Por favor, intente de nuevo.');
           }
         })
-        .catch(error => console.error('Error al calcular la ruta:', error));
+        .catch(error => {
+          console.error('Error al calcular la ruta:', error);
+          alert('Error de conexión. Por favor, verifique su conexión a internet e intente de nuevo.');
+        });
       });
     }
+
+
 
   </script>
 </body>
