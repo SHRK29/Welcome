@@ -6,10 +6,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # Habilitar CORS
 
-# Tu clave de API de Google Maps
 gmaps = googlemaps.Client(key='AIzaSyDgsYuYXRfV0vgqZiVVgMt09IkAjkXqds4')
 
-# Grafo de ejemplo con direcciones, usando coordenadas de hospitales
 hospitals = {
     "Centro De Cancerología De Boyacá": {"lat": 5.5391, "lng": -73.3644},
     "Clinica Chia S.A.": {"lat": 5.5370, "lng": -73.3672},

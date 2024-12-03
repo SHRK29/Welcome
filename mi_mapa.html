@@ -127,7 +127,7 @@
         const hospitalDestino = document.getElementById('hospitalDestino').value;  // Aquí tomas el valor del hospital seleccionado
         
         // Enviar las coordenadas al backend para calcular la ruta
-        fetch('/route', {
+        fetch('https://rutas.onrender.com/route', {  // URL pública de tu backend en Render
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
