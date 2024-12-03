@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import heapq
 import googlemaps
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app)  # Habilitar CORS
@@ -95,4 +96,6 @@ def calculate_route():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Asegúrate de que la aplicación escuche en el puerto asignado por Render
+    port = int(os.environ.get('PORT', 5000))  # Si no está configurado, usar 5000
+    app.run(host='0.0.0.0', port=port, debug=True)
