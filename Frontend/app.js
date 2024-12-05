@@ -2,6 +2,7 @@ let map;
 let marcadorAccidente = null;
 let directionsService;
 let directionsRenderer;
+let marcadoresHospitales = [];
 
 // Datos de los hospitales con coordenadas corregidas
 const hospitales = {
