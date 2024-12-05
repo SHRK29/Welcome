@@ -1,10 +1,33 @@
-let map;
+function LimpiarMapaControl(controlDiv, map) {
+  const controlUI = document.createElement('div');
+  controlUI.style.backgroundColor = '#fff';
+  controlUI.style.border = '2px solid #fff';
+  controlUI.style.borderRadius = '3px';
+  controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+  controlUI.style.cursor = 'pointer';
+  controlUI.style.marginTop = '10px';
+  controlUI.style.marginRight = '10px';
+  controlUI.style.textAlign = 'center';
+  controlUI.title = 'Haz clic para limpiar el mapa';
+  controlDiv.appendChild(controlUI);
+
+  const controlText = document.createElement('div');
+  controlText.style.color = 'rgb(25,25,25)';
+  controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+  controlText.style.fontSize = '16px';
+  controlText.style.lineHeight = '38px';
+  controlText.style.paddingLeft = '5px';
+  controlText.style.paddingRight = '5px';
+  controlText.innerHTML = 'Limpiar Mapa';
+  controlUI.appendChild(controlText);
+
+  controlUI.addEventListener('click', limpiarMapa);
+}let map;
 let marcadorAccidente = null;
 let directionsService;
 let directionsRenderer;
 let marcadoresHospitales = [];
 
-// Datos de los hospitales con coordenadas corregidas
 const hospitales = {
     "Centro De Cancerología De Boyacá": { lat: 5.552517, lng: -73.346096 },
     "Clinica Chia S.A.": { lat: 5.554223367371707, lng: -73.34619501138893 },
@@ -21,6 +44,12 @@ function initMap() {
     zoom: 14
   });
 
+  const limpiarMapaDiv = document.createElement('div');
+  const limpiarMapaControl = new LimpiarMapaControl(limpiarMapaDiv, map);
+
+  limpiarMapaDiv.index = 1;
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(limpiarMapaDiv);
+
   directionsService = new google.maps.DirectionsService();
   directionsRenderer = new google.maps.DirectionsRenderer({
     suppressMarkers: true,
@@ -30,7 +59,6 @@ function initMap() {
   });
   directionsRenderer.setMap(map);
 
-  // Agregar marcadores para todos los hospitales
   for (const [nombre, coords] of Object.entries(hospitales)) {
     const marker = new google.maps.Marker({
       position: coords,
@@ -54,17 +82,13 @@ function initMap() {
     });
     document.getElementById('direccionAccidente').value = `${coords.lat()}, ${coords.lng()}`;
 
-    // Limpiar la ruta anterior
     directionsRenderer.setDirections({routes: []});
-    // Buscar el hospital más cercano
     const hospitalCercano = encontrarHospitalCercano(coords);
     document.getElementById('hospitalDestino').value = hospitalCercano;
 
-    // Calcular la ruta automáticamente
     calcularRuta();
   });
 
-  // Poblar el select de hospitales
   const selectHospital = document.getElementById('hospitalDestino');
   for (const hospital in hospitales) {
     const option = document.createElement('option');
@@ -108,7 +132,6 @@ function calcularRuta() {
   const direccionAccidente = document.getElementById('direccionAccidente').value;
   const hospitalDestino = document.getElementById('hospitalDestino').value;
 
-  // Limpiar marcadores de hospitales anteriores
   marcadoresHospitales.forEach(marcador => marcador.setMap(null));
   marcadoresHospitales = [];
 
@@ -197,4 +220,18 @@ function calcularRuta() {
       alert('Error de conexión. Por favor, verifique su conexión a internet e intente de nuevo.');
     });
   });
+}function limpiarMapa() {
+  if (marcadorAccidente) {
+    marcadorAccidente.setMap(null);
+    marcadorAccidente = null;
+  }
+  directionsRenderer.setDirections({routes: []});
+
+  document.getElementById('direccionAccidente').value = '';
+
+  map.setZoom(14);
+  map.setCenter({ lat: 5.5353, lng: -73.3678 });
+  if (infoWindow) {
+    infoWindow.close();
+  }
 }
