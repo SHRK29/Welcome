@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ruta Óptima para Ambulancia</title>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgsYuYXRfV0vgqZiVVgMt09IkAjkXqds4&libraries=geometry&callback=initMap"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgsYuYXRfV0vgqZiVVgMt09IkAjkXqds4&libraries=geometry"></script>
+  <script src="app.js"></script>
   <style>
-    #map { height: 500px; }
+    #map { height: 500px; width: 100%; }
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -25,185 +26,18 @@
     }
   </style>
 </head>
-<body>
+<body onload="initMap()">
   <h1>Ruta Óptima para Ambulancia</h1>
   <div id="map"></div>
 
   <label for="direccionAccidente">Dirección del Accidente:</label>
   <input type="text" id="direccionAccidente" placeholder="Ejemplo: Calle 22 #6-22, Tunja, Boyacá">
   <br>
-  
-  <!-- Selección del hospital -->
+
   <label for="hospitalDestino">Hospital Destino:</label>
-  <select id="hospitalDestino">
-    <option value="Centro De Cancerología De Boyacá">Centro De Cancerología De Boyacá</option>
-    <option value="Clinica Chia S.A.">Clinica Chia S.A.</option>
-    <option value="Hospital universitario San Rafael">Hospital universitario San Rafael</option>
-    <option value="Clinica Los Andes">Clinica Los Andes</option>
-    <option value="E.S.E Santiago de Tunja">E.S.E Santiago de Tunja</option>
-    <option value="Hospital Metropolitano Santiago de Tunja">Hospital Metropolitano Santiago de Tunja</option>
-    <option value="Clínica Medilaser S.A.">Clínica Medilaser S.A.</option>
-    <option value="Bomberos Tunja">Bomberos Tunja</option>
-    <option value="Sub-Estacion De Bomberos Z2">Sub-Estacion De Bomberos Z2</option>
-    <option value="Sub Estación Sur Luis Alberto Pedreros">Sub Estación Sur Luis Alberto Pedreros</option>
-  </select>
+  <select id="hospitalDestino"></select>
 
   <button onclick="calcularRuta()">Calcular Ruta</button>
-
-  <script>
-    let map;
-    let marcadorAccidente = null;
-    let directionsService;
-    let directionsRenderer;
-
-    function initMap() {
-      // Crear el mapa
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 5.5353, lng: -73.3678 }, // Ubicación inicial de Tunja
-        zoom: 14
-      });
-
-      // Inicializar el servicio de direcciones y el renderizador
-      directionsService = new google.maps.DirectionsService();
-      directionsRenderer = new google.maps.DirectionsRenderer();
-      directionsRenderer.setMap(map);
-
-      // Listener para clic en el mapa
-      google.maps.event.addListener(map, 'click', function(event) {
-        const coords = event.latLng; // Coordenadas donde se hizo clic
-        if (marcadorAccidente) {
-          marcadorAccidente.setMap(null); // Eliminar el marcador anterior si existe
-        }
-        marcadorAccidente = new google.maps.Marker({
-          position: coords,
-          map: map,
-          title: "Accidente"
-        });
-        document.getElementById('direccionAccidente').value = `${coords.lat()}, ${coords.lng()}`; // Muestra las coordenadas en el input
-      });
-    }
-
-    // Datos de los hospitales con coordenadas
-    const hospitales = {
-      "Centro De Cancerología De Boyacá": { lat: 5.5391, lng: -73.3644 },
-      "Clinica Chia S.A.": { lat: 5.5370, lng: -73.3672 },
-      "Hospital universitario San Rafael": { lat: 5.5358, lng: -73.3682 },
-      "Clinica Los Andes": { lat: 5.5314, lng: -73.3669 },
-      "E.S.E Santiago de Tunja": { lat: 5.5350, lng: -73.3678 },
-      "Hospital Metropolitano Santiago de Tunja": { lat: 5.5321, lng: -73.3652 },
-      "Clínica Medilaser S.A.": { lat: 5.5367, lng: -73.3665 },
-      "Bomberos Tunja": { lat: 5.5345, lng: -73.3681 },
-      "Sub-Estacion De Bomberos Z2": { lat: 5.5373, lng: -73.3683 },
-      "Sub Estación Sur Luis Alberto Pedreros": { lat: 5.5341, lng: -73.3694 }
-    };
-
-    function geocodificarDireccion(direccion, callback) {
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ 'address': direccion }, function(results, status) {
-        if (status === google.maps.GeocoderStatus.OK) {
-          callback(results[0].geometry.location);
-        } else {
-          alert("Error al geocodificar la dirección: " + status);
-        }
-      });
-    }
-    function calcularRuta() {
-  const direccionAccidente = document.getElementById('direccionAccidente').value;
-  const hospitalDestino = document.getElementById('hospitalDestino').value;
-
-  // Primero, geocodificar la dirección del accidente
-  geocodificarDireccion(direccionAccidente, function(accidenteCoords) {
-    if (marcadorAccidente) {
-      marcadorAccidente.setMap(null);
-    }
-    marcadorAccidente = new google.maps.Marker({
-      position: accidenteCoords,
-      map: map,
-      title: "Accidente"
-    });
-
-    // Enviar las coordenadas al backend para calcular la ruta
-    fetch('https://rutas.onrender.com/route', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        start_coords: {
-          lat: accidenteCoords.lat(),
-          lng: accidenteCoords.lng()
-        },
-        target: hospitalDestino
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.path && data.path.length > 0) {
-        console.log('Ruta recibida:', data);
-        
-        // Crear una ruta de Google Maps
-        const rutaGoogleMaps = new google.maps.DirectionsService();
-        const renderizadorRuta = new google.maps.DirectionsRenderer({
-          map: map,
-          suppressMarkers: true // Suprime los marcadores predeterminados
-        });
-
-        const hospitalCoords = hospitales[hospitalDestino];
-        const request = {
-          origin: accidenteCoords,
-          destination: hospitalCoords,
-          travelMode: 'DRIVING'
-        };
-
-        rutaGoogleMaps.route(request, function(result, status) {
-          if (status === 'OK') {
-            renderizadorRuta.setDirections(result);
-            
-            // Mostrar marcadores personalizados
-            new google.maps.Marker({
-              position: accidenteCoords,
-              map: map,
-              title: "Accidente",
-              icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
-            });
-            new google.maps.Marker({
-              position: hospitalCoords,
-              map: map,
-              title: hospitalDestino,
-              icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
-            });
-
-            // Ajustar el zoom del mapa para mostrar toda la ruta
-            const bounds = new google.maps.LatLngBounds();
-            bounds.extend(accidenteCoords);
-            bounds.extend(hospitalCoords);
-            map.fitBounds(bounds);
-
-            // Mostrar instrucciones de la ruta
-            const rutaHtml = result.routes[0].legs[0].steps.map(step => step.instructions).join('<br>');
-            const infoWindow = new google.maps.InfoWindow({
-              content: `<div><strong>Instrucciones:</strong><br>${rutaHtml}</div>`
-            });
-            infoWindow.open(map, marcadorAccidente);
-
-            // Mostrar la distancia y duración
-            const distancia = result.routes[0].legs[0].distance.text;
-            const duracion = result.routes[0].legs[0].duration.text;
-            alert(`Distancia: ${distancia}\nDuración estimada: ${duracion}`);
-          }
-        });
-      } else {
-        console.log('Error:', data.error);
-        alert('Error al calcular la ruta. Por favor, intente de nuevo.');
-      }
-    })
-    .catch(error => {
-      console.error('Error al calcular la ruta:', error);
-      alert('Error de conexión. Por favor, verifique su conexión a internet e intente de nuevo.');
-    });
-  });
-}
-
-  </script>
 </body>
 </html>
+

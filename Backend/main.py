@@ -11,17 +11,15 @@ CORS(app)  # Habilitar CORS
 gmaps = googlemaps.Client(key='AIzaSyDgsYuYXRfV0vgqZiVVgMt09IkAjkXqds4')
 
 hospitals = {
-    "Centro De Cancerología De Boyacá": {"lat": 5.5391, "lng": -73.3644},
-    "Clinica Chia S.A.": {"lat": 5.5370, "lng": -73.3672},
-    "Hospital universitario San Rafael": {"lat": 5.5358, "lng": -73.3682},
-    "Clinica Los Andes": {"lat": 5.5314, "lng": -73.3669},
-    "E.S.E Santiago de Tunja": {"lat": 5.5350, "lng": -73.3678},
-    "Hospital Metropolitano Santiago de Tunja": {"lat": 5.5321, "lng": -73.3652},
-    "Clínica Medilaser S.A.": {"lat": 5.5367, "lng": -73.3665},
-    "Bomberos Tunja": {"lat": 5.5345, "lng": -73.3681},
-    "Sub-Estacion De Bomberos Z2": {"lat": 5.5373, "lng": -73.3683},
-    "Sub Estación Sur Luis Alberto Pedreros": {"lat": 5.5341, "lng": -73.3694}
+    "Centro De Cancerología De Boyacá": {"lat": 5.552517, "lng": -73.346096},
+    "Clinica Chia S.A.": {"lat": 5.554223367371707, "lng": -73.34619501138893},
+    "Hospital universitario San Rafael": {"lat": 5.540834874452216, "lng": -73.3610883272055},
+    "Clinica Los Andes": {"lat": 5.544412253256696, "lng": -73.3596720820669},
+    "E.S.E Santiago de Tunja": {"lat": 5.528694520365881, "lng": -73.36240875676042},
+    "Hospital Metropolitano Santiago de Tunja": {"lat": 5.520359509203265, "lng": -73.35806358685134},
+    "Clínica Medilaser S.A.": {"lat": 5.570590425179761, "lng": -73.33692994689878}
 }
+
 
 def haversine_distance(coord1, coord2):
     R = 6371  # Radio de la Tierra en kilómetros
