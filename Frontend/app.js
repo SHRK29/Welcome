@@ -51,12 +51,17 @@ function initMap() {
         map: map,
         title: "Accidente",
         icon: 'http://maps.google.com/mapfiles/kml/shapes/caution.png'
-      });
+    });
     document.getElementById('direccionAccidente').value = `${coords.lat()}, ${coords.lng()}`;
-    
+
+    // Limpiar la ruta anterior
+    directionsRenderer.setDirections({routes: []});
     // Buscar el hospital más cercano
     const hospitalCercano = encontrarHospitalCercano(coords);
     document.getElementById('hospitalDestino').value = hospitalCercano;
+
+    // Calcular la ruta automáticamente
+    calcularRuta();
   });
 
   // Poblar el select de hospitales
@@ -102,6 +107,10 @@ function geocodificarDireccion(direccion, callback) {
 function calcularRuta() {
   const direccionAccidente = document.getElementById('direccionAccidente').value;
   const hospitalDestino = document.getElementById('hospitalDestino').value;
+
+  // Limpiar marcadores de hospitales anteriores
+  marcadoresHospitales.forEach(marcador => marcador.setMap(null));
+  marcadoresHospitales = [];
 
   geocodificarDireccion(direccionAccidente, function(accidenteCoords) {
     if (marcadorAccidente) {
